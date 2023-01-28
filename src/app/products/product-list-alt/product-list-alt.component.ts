@@ -1,36 +1,28 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { Subscription } from 'rxjs';
-
-import { Product } from '../product';
+import { catchError, EMPTY } from 'rxjs';
 import { ProductService } from '../product.service';
 
 @Component({
-  selector: 'pm-product-list',
-  templateUrl: './product-list-alt.component.html'
+    selector: 'pm-product-list',
+    templateUrl: './product-list-alt.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProductListAltComponent implements OnInit, OnDestroy {
-  pageTitle = 'Products';
-  errorMessage = '';
-  selectedProductId = 0;
+export class ProductListAltComponent {
+    pageTitle = 'Products';
+    errorMessage = '';
+    selectedProductId = 0;
 
-  products: Product[] = [];
-  sub!: Subscription;
+    products$ = this.productService.productsWithCategory$.pipe(
+        catchError( err => {
+            this.errorMessage = err;
+            return EMPTY;
+        })
+    );
 
-  constructor(private productService: ProductService) { }
+    constructor(private productService: ProductService) { }
 
-  ngOnInit(): void {
-    this.sub = this.productService.getProducts().subscribe({
-      next: products => this.products = products,
-      error: err => this.errorMessage = err
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
-  onSelected(productId: number): void {
-    console.log('Not yet implemented');
-  }
+    onSelected(productId: number): void {
+        console.log('Not yet implemented');
+    }
 }
